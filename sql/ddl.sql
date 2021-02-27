@@ -7,7 +7,7 @@ CREATE TABLE airdrop_event (
     room_id VARCHAR(256) NOT NULL,
     token CHAR(3) NOT NULL,
     total_amount INTEGER UNSIGNED NOT NULL,
-    created_at INTEGER UNSIGNED
+    created_at INTEGER UNSIGNED,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 SHOW WARNINGS;
