@@ -6,5 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface SenderRepository extends CrudRepository<AirDropSender, Long> {
 
+    Optional<AirDropSender> findByUserIdAndRoomIdAndToken(Long userId, String roomId, String token);
+
     Optional<AirDropSender> findByRoomIdAndToken(String roomId, String token);
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.money.airdrop.controller.AirDrop;
+import com.money.airdrop.controller.AirDropStatus;
 import com.money.airdrop.domain.AirDropReceiver;
 import com.money.airdrop.repository.MemoryReceiverRepository;
 import com.money.airdrop.repository.MemorySenderRepository;
@@ -95,7 +96,7 @@ public class AirDropServiceTest {
         assertThrows(IllegalArgumentException.class,
             () -> airDropService.receive(2L, roomId, "invalid"));
         assertThrows(IllegalArgumentException.class,
-            () -> airDropService.receive(2L, "room 2", token));
+            () -> airDropService.receive(2L, "invalid", token));
 
         airDropService.receive(2L, roomId, token);
         assertThrows(IllegalArgumentException.class,
@@ -110,7 +111,42 @@ public class AirDropServiceTest {
     @Test
     void getStatus() {
         // given
+        String roomId = "room 1";
+        String token = airDropService.send(1L, roomId, new AirDrop(1000, 2));
+
         // when
         // then
+        AirDropStatus status = airDropService.status(1L, roomId, token);
+        assertThat(status.getTotalAmount()).isEqualTo(1000);
+        assertThat(status.getReceivedAmount()).isEqualTo(0);
+        assertThat(status.getReceivers()).isNull();
+
+        airDropService.receive(2L, roomId, token);
+        status = airDropService.status(1L, roomId, token);
+        assertThat(status.getTotalAmount()).isEqualTo(1000);
+        assertThat(status.getReceivedAmount()).isGreaterThan(0).isLessThan(1000);
+        assertThat(status.getReceivers().size()).isEqualTo(1);
+
+        airDropService.receive(3L, roomId, token);
+        status = airDropService.status(1L, roomId, token);
+        assertThat(status.getTotalAmount()).isEqualTo(1000);
+        assertThat(status.getReceivedAmount()).isEqualTo(1000);
+        assertThat(status.getReceivers().size()).isEqualTo(2);
+    }
+
+    @Test
+    void getStatusWithInvalidArgs() {
+        // given
+        String roomId = "room 1";
+        String token = airDropService.send(1L, roomId, new AirDrop(1000, 2));
+
+        // when
+        // then
+        assertThrows(RuntimeException.class,
+            () -> airDropService.status(2L, roomId, token));
+        assertThrows(RuntimeException.class,
+            () -> airDropService.status(1L, "invalid", token));
+        assertThrows(RuntimeException.class,
+            () -> airDropService.status(1L, roomId, "invalid"));
     }
 }

@@ -34,8 +34,10 @@ public class AirDropController {
     }
 
     @GetMapping("/airdrops/{token}")
-    public String status(@RequestHeader(name = "X-USER-ID") Long userId,
+    public AirDropStatus status(
+        @RequestHeader(name = "X-USER-ID") Long userId,
+        @RequestHeader(name = "X-ROOM-ID") String roomId,
         @PathVariable String token) {
-        return airDropService.status(userId, token);
+        return airDropService.status(userId, roomId, token);
     }
 }

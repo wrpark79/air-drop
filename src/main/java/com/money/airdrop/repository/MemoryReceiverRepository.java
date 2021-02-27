@@ -12,8 +12,7 @@ public class MemoryReceiverRepository implements ReceiverRepository {
 
     @Override
     public <S extends AirDropReceiver> S save(S entity) {
-        entity.setId(++sequence);
-        store.put(entity.getId(), entity);
+        assert entity.getId() != null;
         return entity;
     }
 

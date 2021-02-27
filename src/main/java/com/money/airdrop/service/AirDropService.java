@@ -1,6 +1,7 @@
 package com.money.airdrop.service;
 
 import com.money.airdrop.controller.AirDrop;
+import com.money.airdrop.controller.AirDropStatus;
 import com.money.airdrop.domain.AirDropReceiver;
 import com.money.airdrop.domain.AirDropSender;
 import com.money.airdrop.repository.ReceiverRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class AirDropService {
 
     private static final int MAX_AMOUNT = 100000000;
@@ -30,7 +32,6 @@ public class AirDropService {
         this.receiverRepository = receiverRepository;
     }
 
-    @Transactional
     public String send(Long userId, String roomId, AirDrop payload) {
         int totalAmount = payload.getAmount();
         if (totalAmount > MAX_AMOUNT) {
@@ -52,7 +53,6 @@ public class AirDropService {
             .receiverCount(receiverCount)
             .createdAt(System.currentTimeMillis())
             .build();
-        senderRepository.save(sender);
 
         List<AirDropReceiver> receivers = new ArrayList<>(receiverCount);
         int remainingBonus = totalAmount - MIN_AMOUNT * receiverCount;
@@ -67,12 +67,14 @@ public class AirDropService {
                     .build());
             remainingBonus -= bonus;
         }
+        sender.setReceivers(receivers);
+
+        senderRepository.save(sender);
         receiverRepository.saveAll(receivers);
 
         return sender.getToken();
     }
 
-    @Transactional
     public int receive(Long userId, String roomId, String token) {
         Optional<AirDropSender> senderInfo = senderRepository.findByRoomIdAndToken(roomId, token);
         if (senderInfo.isEmpty()) {
@@ -98,11 +100,38 @@ public class AirDropService {
 
         AirDropReceiver receiver = receiverInfo.get();
         receiver.setUserId(userId);
+        receiverRepository.save(receiver);
 
         return receiver.getAmount();
     }
 
-    public String status(Long userId, String token) {
-        return "";
+    public AirDropStatus status(Long userId, String roomId, String token) {
+        Optional<AirDropSender> senderInfo =
+            senderRepository.findByUserIdAndRoomIdAndToken(userId, roomId, token);
+        if (senderInfo.isEmpty()) {
+            throw new IllegalArgumentException("뿌리기를 찾을 수 없습니다");
+        }
+
+        AirDropSender sender = senderInfo.get();
+        if (System.currentTimeMillis() > sender.getCreatedAt() + 7 * 86400000) {
+            throw new RuntimeException("시간이 경과되어 조회할 수 없습니다");
+        }
+
+        AirDropStatus info = new AirDropStatus();
+        int receivedAmount = 0;
+
+        List<AirDropReceiver> receivers = sender.getReceivers();
+        if (receivers != null) {
+            for (AirDropReceiver receiver : sender.getReceivers()) {
+                if (receiver.getUserId() != null) {
+                    receivedAmount += receiver.getAmount();
+                    info.addReceiver(receiver.getUserId(), receiver.getAmount());
+                }
+            }
+        }
+        info.setTotalAmount(sender.getTotalAmount());
+        info.setReceivedAmount(receivedAmount);
+
+        return info;
     }
 }

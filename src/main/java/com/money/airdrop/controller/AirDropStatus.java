@@ -1,5 +1,6 @@
 package com.money.airdrop.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +14,9 @@ public class AirDropStatus {
     private List<Receiver> receivers;
 
     public void addReceiver(long userId, int amount) {
+        if (receivers == null)
+            receivers = new ArrayList<>();
+
         receivers.add(new Receiver(userId, amount));
     }
 
