@@ -1,6 +1,7 @@
 package com.money.airdrop.domain;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,6 +13,7 @@ import lombok.Data;
 
 @Data
 @Builder
+@Entity
 public class AirDropRecipient {
 
     @Id

@@ -2,6 +2,7 @@ package com.money.airdrop.domain;
 
 import java.util.List;
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,6 +14,7 @@ import lombok.NonNull;
 
 @Data
 @Builder
+@Entity
 public class AirDropEvent {
 
     @Id
@@ -33,6 +35,6 @@ public class AirDropEvent {
     @NonNull
     private Long createdAt;
 
-    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<AirDropRecipient> recipients;
 }
