@@ -14,26 +14,26 @@ import lombok.NonNull;
 @Data
 public class AirDropSender {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @NonNull
-  private Long userId;
+    @NonNull
+    private Long userId;
 
-  @NonNull
-  private String roomId;
+    @NonNull
+    private String roomId;
 
-  @NonNull
-  private String token;
+    @NonNull
+    private String token;
 
-  private int totalAmount;
-  private int receiverCount;
+    private int totalAmount;
+    private int receiverCount;
 
-  @NonNull
-  private Long createdAt;
+    @NonNull
+    private Long createdAt;
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  @JoinColumn(name = "sender_id")
-  private Collection<AirDropReceiver> receivers;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "sender_id")
+    private Collection<AirDropReceiver> receivers;
 }

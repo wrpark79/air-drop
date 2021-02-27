@@ -11,30 +11,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AirDropController {
 
-  private final AirDropService airDropService;
+    private final AirDropService airDropService;
 
-  public AirDropController(AirDropService airDropService) {
-    this.airDropService = airDropService;
-  }
+    public AirDropController(AirDropService airDropService) {
+        this.airDropService = airDropService;
+    }
 
-  @PostMapping("/airdrops")
-  public String send(
-      @RequestHeader(name = "X-USER-ID") Long userId,
-      @RequestHeader(name = "X-ROOM-ID") String roomId,
-      @RequestBody AirDrop airDrop) {
-    return airDropService.send(userId, roomId, airDrop);
-  }
+    @PostMapping("/airdrops")
+    public String send(
+        @RequestHeader(name = "X-USER-ID") Long userId,
+        @RequestHeader(name = "X-ROOM-ID") String roomId,
+        @RequestBody AirDrop airDrop) {
+        return airDropService.send(userId, roomId, airDrop);
+    }
 
-  @PostMapping("/airdrops/{token}")
-  public String receive(
-      @RequestHeader(name = "X-USER-ID") Long userId,
-      @RequestHeader(name = "X-ROOM-ID") String roomId,
-      @PathVariable String token) {
-    return airDropService.receive(userId, roomId, token);
-  }
+    @PostMapping("/airdrops/{token}")
+    public String receive(
+        @RequestHeader(name = "X-USER-ID") Long userId,
+        @RequestHeader(name = "X-ROOM-ID") String roomId,
+        @PathVariable String token) {
+        return airDropService.receive(userId, roomId, token);
+    }
 
-  @GetMapping("/airdrops/{token}")
-  public String status(@RequestHeader(name = "X-USER-ID") Long userId, @PathVariable String token) {
-    return airDropService.status(userId, token);
-  }
+    @GetMapping("/airdrops/{token}")
+    public String status(@RequestHeader(name = "X-USER-ID") Long userId,
+        @PathVariable String token) {
+        return airDropService.status(userId, token);
+    }
 }

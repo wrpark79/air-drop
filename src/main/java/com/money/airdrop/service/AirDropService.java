@@ -7,23 +7,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AirDropService {
-  private final SenderRepository senderRepository;
-  private final ReceiverRepository receiverRepository;
 
-  public AirDropService(SenderRepository senderRepository, ReceiverRepository receiverRepository) {
-    this.senderRepository = senderRepository;
-    this.receiverRepository = receiverRepository;
-  }
+    private final SenderRepository senderRepository;
+    private final ReceiverRepository receiverRepository;
 
-  public String send(Long userId, String roomId, AirDrop airDrop) {
-    return "";
-  }
+    public AirDropService(SenderRepository senderRepository,
+        ReceiverRepository receiverRepository) {
+        this.senderRepository = senderRepository;
+        this.receiverRepository = receiverRepository;
+    }
 
-  public String receive(Long userId, String roomId, String token) {
-    return "";
-  }
+    public String send(Long userId, String roomId, AirDrop payload) {
+        return "";
+    }
 
-  public String status(Long userId, String token) {
-    return "";
-  }
+    public String receive(Long userId, String roomId, String token) {
+        return "";
+    }
+
+    public String status(Long userId, String token) {
+        return "";
+    }
 }
