@@ -1,5 +1,6 @@
 package com.money.airdrop.service;
 
+import com.money.airdrop.controller.AirDrop;
 import com.money.airdrop.repository.ReceiverRepository;
 import com.money.airdrop.repository.SenderRepository;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ public class AirDropService {
     this.receiverRepository = receiverRepository;
   }
 
-  public String send(Long userId, String roomId) {
+  public String send(Long userId, String roomId, AirDrop airDrop) {
     return "";
   }
 

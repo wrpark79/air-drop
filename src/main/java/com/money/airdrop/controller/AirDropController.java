@@ -4,6 +4,7 @@ import com.money.airdrop.service.AirDropService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,8 +20,9 @@ public class AirDropController {
   @PostMapping("/airdrops")
   public String send(
       @RequestHeader(name = "X-USER-ID") Long userId,
-      @RequestHeader(name = "X-ROOM-ID") String roomId) {
-    return airDropService.send(userId, roomId);
+      @RequestHeader(name = "X-ROOM-ID") String roomId,
+      @RequestBody AirDrop airDrop) {
+    return airDropService.send(userId, roomId, airDrop);
   }
 
   @PostMapping("/airdrops/{token}")
