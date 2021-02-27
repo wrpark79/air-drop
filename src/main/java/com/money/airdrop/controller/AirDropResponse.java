@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class AirDropStatus {
+public class AirDropResponse {
 
     private int totalAmount;
     private int receivedAmount;

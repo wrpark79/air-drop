@@ -13,7 +13,7 @@ import lombok.NonNull;
 
 @Data
 @Builder
-public class AirDropSender {
+public class AirDropEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,6 @@ public class AirDropSender {
     private String token;
 
     private int totalAmount;
-    private int receiverCount;
 
     @NonNull
     private Long createdAt;

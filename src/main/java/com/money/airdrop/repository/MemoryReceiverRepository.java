@@ -4,7 +4,9 @@ import com.money.airdrop.domain.AirDropReceiver;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class MemoryReceiverRepository implements ReceiverRepository {
 
     private static final Map<Long, AirDropReceiver> store = new HashMap<>();
@@ -69,7 +71,7 @@ public class MemoryReceiverRepository implements ReceiverRepository {
     @Override
     public Optional<AirDropReceiver> findByIdAndUserId(Long id, Long userId) {
         for (AirDropReceiver receiver : store.values()) {
-            if (receiver.getSender().getId().equals(id) &&
+            if (receiver.getEvent().getId().equals(id) &&
                 receiver.getUserId() != null &&
                 receiver.getUserId().equals(userId)) {
                 return Optional.of(receiver);
@@ -81,7 +83,7 @@ public class MemoryReceiverRepository implements ReceiverRepository {
     @Override
     public Optional<AirDropReceiver> findByIdAndUserIdNull(Long id) {
         for (AirDropReceiver receiver : store.values()) {
-            if (receiver.getSender().getId().equals(id) && receiver.getUserId() == null) {
+            if (receiver.getEvent().getId().equals(id) && receiver.getUserId() == null) {
                 return Optional.of(receiver);
             }
         }

@@ -21,8 +21,8 @@ public class AirDropController {
     public String send(
         @RequestHeader(name = "X-USER-ID") Long userId,
         @RequestHeader(name = "X-ROOM-ID") String roomId,
-        @RequestBody AirDrop airDrop) {
-        return airDropService.send(userId, roomId, airDrop);
+        @RequestBody AirDropRequest payload) {
+        return airDropService.send(userId, roomId, payload);
     }
 
     @PostMapping("/airdrops/{token}")
@@ -34,7 +34,7 @@ public class AirDropController {
     }
 
     @GetMapping("/airdrops/{token}")
-    public AirDropStatus status(
+    public AirDropResponse status(
         @RequestHeader(name = "X-USER-ID") Long userId,
         @RequestHeader(name = "X-ROOM-ID") String roomId,
         @PathVariable String token) {

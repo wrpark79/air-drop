@@ -22,6 +22,6 @@ public class AirDropReceiver {
     private int amount;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "sender_id")
-    private AirDropSender sender;
+    @JoinColumn(name = "event_id")
+    private AirDropEvent event;
 }

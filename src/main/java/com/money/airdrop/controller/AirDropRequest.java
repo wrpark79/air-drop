@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AirDrop {
+public class AirDropRequest {
 
     private int amount;
     private int receiverCount;

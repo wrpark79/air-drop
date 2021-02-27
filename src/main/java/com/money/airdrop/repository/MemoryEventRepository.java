@@ -1,25 +1,27 @@
 package com.money.airdrop.repository;
 
-import com.money.airdrop.domain.AirDropSender;
+import com.money.airdrop.domain.AirDropEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
 
-public class MemorySenderRepository implements SenderRepository {
+@Repository
+public class MemoryEventRepository implements EventRepository {
 
-    private static final Map<Long, AirDropSender> store = new HashMap<>();
+    private static final Map<Long, AirDropEvent> store = new HashMap<>();
     private static long sequence = 0;
 
     @Override
-    public <S extends AirDropSender> S save(S entity) {
+    public <S extends AirDropEvent> S save(S entity) {
         entity.setId(++sequence);
         store.put(entity.getId(), entity);
         return entity;
     }
 
     @Override
-    public <S extends AirDropSender> Iterable<S> saveAll(Iterable<S> entities) {
-        for (AirDropSender entity : entities) {
+    public <S extends AirDropEvent> Iterable<S> saveAll(Iterable<S> entities) {
+        for (AirDropEvent entity : entities) {
             entity.setId(++sequence);
             store.put(entity.getId(), entity);
         }
@@ -27,7 +29,7 @@ public class MemorySenderRepository implements SenderRepository {
     }
 
     @Override
-    public Optional<AirDropSender> findById(Long aLong) {
+    public Optional<AirDropEvent> findById(Long aLong) {
         return Optional.empty();
     }
 
@@ -37,12 +39,12 @@ public class MemorySenderRepository implements SenderRepository {
     }
 
     @Override
-    public Iterable<AirDropSender> findAll() {
+    public Iterable<AirDropEvent> findAll() {
         return null;
     }
 
     @Override
-    public Iterable<AirDropSender> findAllById(Iterable<Long> longs) {
+    public Iterable<AirDropEvent> findAllById(Iterable<Long> longs) {
         return null;
     }
 
@@ -56,11 +58,11 @@ public class MemorySenderRepository implements SenderRepository {
     }
 
     @Override
-    public void delete(AirDropSender entity) {
+    public void delete(AirDropEvent entity) {
     }
 
     @Override
-    public void deleteAll(Iterable<? extends AirDropSender> entities) {
+    public void deleteAll(Iterable<? extends AirDropEvent> entities) {
     }
 
     @Override
@@ -68,20 +70,20 @@ public class MemorySenderRepository implements SenderRepository {
     }
 
     @Override
-    public Optional<AirDropSender> findByUserIdAndRoomIdAndToken(Long userId, String roomId,
+    public Optional<AirDropEvent> findByUserIdAndRoomIdAndToken(Long userId, String roomId,
         String token) {
         return store.values().stream()
-            .filter(sender -> sender.getUserId().equals(userId) &&
-                sender.getRoomId().equals(roomId) &&
-                sender.getToken().equals(token))
+            .filter(e -> e.getUserId().equals(userId) &&
+                e.getRoomId().equals(roomId) &&
+                e.getToken().equals(token))
             .findFirst();
     }
 
     @Override
-    public Optional<AirDropSender> findByRoomIdAndToken(String roomId,
+    public Optional<AirDropEvent> findByRoomIdAndToken(String roomId,
         String token) {
         return store.values().stream()
-            .filter(sender -> sender.getRoomId().equals(roomId) && sender.getToken().equals(token))
+            .filter(e -> e.getRoomId().equals(roomId) && e.getToken().equals(token))
             .findFirst();
     }
 
