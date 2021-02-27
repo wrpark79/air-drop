@@ -26,7 +26,7 @@ public class AirDropController {
     }
 
     @PostMapping("/airdrops/{token}")
-    public String receive(
+    public int receive(
         @RequestHeader(name = "X-USER-ID") Long userId,
         @RequestHeader(name = "X-ROOM-ID") String roomId,
         @PathVariable String token) {

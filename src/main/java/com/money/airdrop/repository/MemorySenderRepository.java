@@ -66,4 +66,16 @@ public class MemorySenderRepository implements SenderRepository {
     @Override
     public void deleteAll() {
     }
+
+    @Override
+    public Optional<AirDropSender> findByRoomIdAndToken(String roomId,
+        String token) {
+        return store.values().stream()
+            .filter(sender -> sender.getRoomId().equals(roomId) && sender.getToken().equals(token))
+            .findFirst();
+    }
+
+    public void clear() {
+        store.clear();
+    }
 }

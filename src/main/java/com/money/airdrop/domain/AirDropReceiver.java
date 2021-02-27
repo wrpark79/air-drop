@@ -18,7 +18,7 @@ public class AirDropReceiver {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long receiverId;
+    private Long userId;
     private int amount;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

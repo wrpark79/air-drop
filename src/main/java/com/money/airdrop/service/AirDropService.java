@@ -7,9 +7,11 @@ import com.money.airdrop.repository.ReceiverRepository;
 import com.money.airdrop.repository.SenderRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AirDropService {
@@ -28,6 +30,7 @@ public class AirDropService {
         this.receiverRepository = receiverRepository;
     }
 
+    @Transactional
     public String send(Long userId, String roomId, AirDrop payload) {
         int totalAmount = payload.getAmount();
         if (totalAmount > MAX_AMOUNT) {
@@ -69,8 +72,34 @@ public class AirDropService {
         return sender.getToken();
     }
 
-    public String receive(Long userId, String roomId, String token) {
-        return "";
+    @Transactional
+    public int receive(Long userId, String roomId, String token) {
+        Optional<AirDropSender> senderInfo = senderRepository.findByRoomIdAndToken(roomId, token);
+        if (senderInfo.isEmpty()) {
+            throw new IllegalArgumentException("뿌린 기록을 찾을 수 없습니다");
+        }
+
+        AirDropSender sender = senderInfo.get();
+        if (sender.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("뿌린 사람은 받을 수 없습니다");
+        } else if (System.currentTimeMillis() > sender.getCreatedAt() + 600000) {
+            throw new IllegalArgumentException("받을 수 있는 시간이 초과되었습니다");
+        }
+
+        if (receiverRepository.findByIdAndUserId(sender.getId(), userId).isPresent()) {
+            throw new IllegalArgumentException("뿌리기는 한번만 받을 수 있습니다");
+        }
+
+        Optional<AirDropReceiver> receiverInfo =
+            receiverRepository.findByIdAndUserIdNull(sender.getId());
+        if (receiverInfo.isEmpty()) {
+            throw new RuntimeException("뿌리기가 이미 종료되었습니다");
+        }
+
+        AirDropReceiver receiver = receiverInfo.get();
+        receiver.setUserId(userId);
+
+        return receiver.getAmount();
     }
 
     public String status(Long userId, String token) {

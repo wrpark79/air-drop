@@ -1,7 +1,6 @@
 package com.money.airdrop.repository;
 
 import com.money.airdrop.domain.AirDropReceiver;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -66,5 +65,31 @@ public class MemoryReceiverRepository implements ReceiverRepository {
 
     @Override
     public void deleteAll() {
+    }
+
+    @Override
+    public Optional<AirDropReceiver> findByIdAndUserId(Long id, Long userId) {
+        for (AirDropReceiver receiver : store.values()) {
+            if (receiver.getSender().getId().equals(id) &&
+                receiver.getUserId() != null &&
+                receiver.getUserId().equals(userId)) {
+                return Optional.of(receiver);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<AirDropReceiver> findByIdAndUserIdNull(Long id) {
+        for (AirDropReceiver receiver : store.values()) {
+            if (receiver.getSender().getId().equals(id) && receiver.getUserId() == null) {
+                return Optional.of(receiver);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public void clear() {
+        store.clear();
     }
 }

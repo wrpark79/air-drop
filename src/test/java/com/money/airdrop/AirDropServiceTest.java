@@ -1,30 +1,35 @@
 package com.money.airdrop;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.money.airdrop.controller.AirDrop;
 import com.money.airdrop.domain.AirDropReceiver;
 import com.money.airdrop.repository.MemoryReceiverRepository;
 import com.money.airdrop.repository.MemorySenderRepository;
-import com.money.airdrop.repository.ReceiverRepository;
-import com.money.airdrop.repository.SenderRepository;
 import com.money.airdrop.service.AirDropService;
 import java.util.Collection;
-import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class AirDropServiceTest {
 
     AirDropService airDropService;
-    SenderRepository senderRepository;
-    ReceiverRepository receiverRepository;
+    MemorySenderRepository senderRepository;
+    MemoryReceiverRepository receiverRepository;
 
     @BeforeEach
     void beforeEach() {
         senderRepository = new MemorySenderRepository();
         receiverRepository = new MemoryReceiverRepository();
         airDropService = new AirDropService(senderRepository, receiverRepository);
+    }
+
+    @AfterEach
+    void afterEach() {
+        senderRepository.clear();
+        receiverRepository.clear();
     }
 
     @Test
@@ -44,16 +49,62 @@ public class AirDropServiceTest {
         assertThat(receivers.size()).isEqualTo(receiverCount);
 
         for (AirDropReceiver receiver : receivers) {
-            assertThat(receiver.getReceiverId()).isNull();
+            assertThat(receiver.getUserId()).isNull();
             assertThat(receiver.getAmount()).isGreaterThanOrEqualTo(100);
         }
     }
 
     @Test
+    void sendMoneyWithInvalidArgs() {
+        assertThrows(IllegalArgumentException.class,
+            () -> airDropService.send(1L, "room 1", new AirDrop(200000000, 5)));
+        assertThrows(IllegalArgumentException.class,
+            () -> airDropService.send(1L, "room 1", new AirDrop(1000, 0)));
+        assertThrows(IllegalArgumentException.class,
+            () -> airDropService.send(1L, "room 1", new AirDrop(100, 3)));
+    }
+
+    @Test
     void receiveMoney() {
         // given
+        String roomId = "room 1";
+        String token = airDropService.send(1L, roomId, new AirDrop(1000, 3));
+
         // when
         // then
+        int receivedMoney = airDropService.receive(2L, roomId, token);
+        assertThat(receivedMoney).isGreaterThanOrEqualTo(100);
+
+        receivedMoney = airDropService.receive(3L, roomId, token);
+        assertThat(receivedMoney).isGreaterThanOrEqualTo(100);
+
+        receivedMoney = airDropService.receive(4L, roomId, token);
+        assertThat(receivedMoney).isGreaterThanOrEqualTo(100);
+    }
+
+    @Test
+    void receiveMoneyWithInvalidArgs() {
+        // given
+        String roomId = "room 1";
+        String token = airDropService.send(1L, roomId, new AirDrop(1000, 3));
+
+        // when
+        // then
+        assertThrows(IllegalArgumentException.class,
+            () -> airDropService.receive(1L, roomId, token));
+        assertThrows(IllegalArgumentException.class,
+            () -> airDropService.receive(2L, roomId, "invalid"));
+        assertThrows(IllegalArgumentException.class,
+            () -> airDropService.receive(2L, "room 2", token));
+
+        airDropService.receive(2L, roomId, token);
+        assertThrows(IllegalArgumentException.class,
+            () -> airDropService.receive(2L, roomId, token));
+
+        airDropService.receive(3L, roomId, token);
+        airDropService.receive(4L, roomId, token);
+        assertThrows(RuntimeException.class,
+            () -> airDropService.receive(5L, roomId, token));
     }
 
     @Test
