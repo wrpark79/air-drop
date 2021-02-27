@@ -11,18 +11,19 @@ public class AirDropResponse {
     private int totalAmount;
     private int receivedAmount;
     private long createdAt;
-    private List<Receiver> receivers;
+    private List<Recipient> recipients;
 
-    public void addReceiver(long userId, int amount) {
-        if (receivers == null)
-            receivers = new ArrayList<>();
+    public void addRecipient(long userId, int amount) {
+        if (recipients == null) {
+            recipients = new ArrayList<>();
+        }
 
-        receivers.add(new Receiver(userId, amount));
+        recipients.add(new Recipient(userId, amount));
     }
 
     @Data
     @AllArgsConstructor
-    private static class Receiver {
+    private static class Recipient {
 
         private long userId;
         private int amount;

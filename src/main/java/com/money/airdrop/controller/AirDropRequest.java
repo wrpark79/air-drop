@@ -8,5 +8,5 @@ import lombok.Data;
 public class AirDropRequest {
 
     private int amount;
-    private int receiverCount;
+    private int count;
 }

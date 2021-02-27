@@ -2,10 +2,10 @@ package com.money.airdrop.service;
 
 import com.money.airdrop.controller.AirDropRequest;
 import com.money.airdrop.controller.AirDropResponse;
-import com.money.airdrop.domain.AirDropReceiver;
 import com.money.airdrop.domain.AirDropEvent;
-import com.money.airdrop.repository.ReceiverRepository;
+import com.money.airdrop.domain.AirDropRecipient;
 import com.money.airdrop.repository.EventRepository;
+import com.money.airdrop.repository.RecipientRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,14 +22,14 @@ public class AirDropService {
     private static final int MIN_AMOUNT = 100;
 
     private final EventRepository eventRepository;
-    private final ReceiverRepository receiverRepository;
+    private final RecipientRepository recipientRepository;
 
     private final Random random = new Random();
 
     public AirDropService(EventRepository eventRepository,
-        ReceiverRepository receiverRepository) {
+        RecipientRepository recipientRepository) {
         this.eventRepository = eventRepository;
-        this.receiverRepository = receiverRepository;
+        this.recipientRepository = recipientRepository;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -39,10 +39,10 @@ public class AirDropService {
             throw new IllegalArgumentException("뿌릴 금액은 " + MAX_AMOUNT + "원 이하여야 합니다");
         }
 
-        int receiverCount = payload.getReceiverCount();
-        if (receiverCount <= 0) {
+        int totalCount = payload.getCount();
+        if (totalCount <= 0) {
             throw new IllegalArgumentException("받을 사람은 최소한 1명 이상이어야 합니다");
-        } else if (totalAmount < MIN_AMOUNT * receiverCount) {
+        } else if (totalAmount < MIN_AMOUNT * totalCount) {
             throw new IllegalArgumentException("1인당 최소 " + MIN_AMOUNT + "원 이상을 받을 수 있어야 합니다");
         }
 
@@ -54,23 +54,23 @@ public class AirDropService {
             .createdAt(System.currentTimeMillis())
             .build();
 
-        List<AirDropReceiver> receivers = new ArrayList<>(receiverCount);
-        int remainingBonus = totalAmount - MIN_AMOUNT * receiverCount;
+        List<AirDropRecipient> recipients = new ArrayList<>(totalCount);
+        int remainingBonus = totalAmount - MIN_AMOUNT * totalCount;
 
-        for (int i = 0; i < receiverCount; i++) {
+        for (int i = 0; i < totalCount; i++) {
             int bonus =
-                (i < receiverCount - 1) ? random.nextInt(remainingBonus + 1) : remainingBonus;
-            receivers.add(
-                AirDropReceiver.builder()
+                (i < totalCount - 1) ? random.nextInt(remainingBonus + 1) : remainingBonus;
+            recipients.add(
+                AirDropRecipient.builder()
                     .event(event)
                     .amount(MIN_AMOUNT + bonus)
                     .build());
             remainingBonus -= bonus;
         }
-        event.setReceivers(receivers);
+        event.setRecipients(recipients);
 
         eventRepository.save(event);
-        receiverRepository.saveAll(receivers);
+        recipientRepository.saveAll(recipients);
 
         return event.getToken();
     }
@@ -89,21 +89,21 @@ public class AirDropService {
             throw new IllegalArgumentException("받을 수 있는 시간이 초과되었습니다");
         }
 
-        if (receiverRepository.findByEventIdAndUserId(event.getId(), userId).isPresent()) {
+        if (recipientRepository.findByEventIdAndUserId(event.getId(), userId).isPresent()) {
             throw new IllegalArgumentException("뿌리기는 한번만 받을 수 있습니다");
         }
 
-        Optional<AirDropReceiver> optReceiver =
-            receiverRepository.findByEventIdAndUserIdNull(event.getId());
-        if (optReceiver.isEmpty()) {
+        Optional<AirDropRecipient> optRecipient =
+            recipientRepository.findByEventIdAndUserIdNull(event.getId());
+        if (optRecipient.isEmpty()) {
             throw new RuntimeException("뿌리기가 이미 종료되었습니다");
         }
 
-        AirDropReceiver receiver = optReceiver.get();
-        receiver.setUserId(userId);
-        receiverRepository.save(receiver);
+        AirDropRecipient recipient = optRecipient.get();
+        recipient.setUserId(userId);
+        recipientRepository.save(recipient);
 
-        return receiver.getAmount();
+        return recipient.getAmount();
     }
 
     public AirDropResponse status(Long userId, String roomId, String token) {
@@ -113,26 +113,26 @@ public class AirDropService {
             throw new IllegalArgumentException("뿌리기를 찾을 수 없습니다");
         }
 
-        AirDropEvent sender = optEvent.get();
-        if (System.currentTimeMillis() > sender.getCreatedAt() + 7 * 86400000) {
+        AirDropEvent event = optEvent.get();
+        if (System.currentTimeMillis() > event.getCreatedAt() + 7 * 86400000) {
             throw new RuntimeException("시간이 경과되어 조회할 수 없습니다");
         }
 
-        AirDropResponse info = new AirDropResponse();
+        AirDropResponse response = new AirDropResponse();
         int receivedAmount = 0;
 
-        List<AirDropReceiver> receivers = sender.getReceivers();
-        if (receivers != null) {
-            for (AirDropReceiver receiver : sender.getReceivers()) {
-                if (receiver.getUserId() != null) {
-                    receivedAmount += receiver.getAmount();
-                    info.addReceiver(receiver.getUserId(), receiver.getAmount());
+        List<AirDropRecipient> recipients = event.getRecipients();
+        if (recipients != null) {
+            for (AirDropRecipient recipient : event.getRecipients()) {
+                if (recipient.getUserId() != null) {
+                    receivedAmount += recipient.getAmount();
+                    response.addRecipient(recipient.getUserId(), recipient.getAmount());
                 }
             }
         }
-        info.setTotalAmount(sender.getTotalAmount());
-        info.setReceivedAmount(receivedAmount);
+        response.setTotalAmount(event.getTotalAmount());
+        response.setReceivedAmount(receivedAmount);
 
-        return info;
+        return response;
     }
 }

@@ -34,5 +34,5 @@ public class AirDropEvent {
     private Long createdAt;
 
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<AirDropReceiver> receivers;
+    private List<AirDropRecipient> recipients;
 }

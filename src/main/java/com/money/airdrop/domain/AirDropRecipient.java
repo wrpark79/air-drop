@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class AirDropReceiver {
+public class AirDropRecipient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.money.airdrop.controller.AirDropRequest;
 import com.money.airdrop.controller.AirDropResponse;
-import com.money.airdrop.domain.AirDropReceiver;
-import com.money.airdrop.repository.MemoryReceiverRepository;
+import com.money.airdrop.domain.AirDropRecipient;
+import com.money.airdrop.repository.MemoryRecipientRepository;
 import com.money.airdrop.repository.MemoryEventRepository;
 import com.money.airdrop.service.AirDropService;
 import java.util.Collection;
@@ -18,19 +18,19 @@ public class AirDropServiceTest {
 
     AirDropService airDropService;
     MemoryEventRepository eventRepository;
-    MemoryReceiverRepository receiverRepository;
+    MemoryRecipientRepository recipientRepository;
 
     @BeforeEach
     void beforeEach() {
         eventRepository = new MemoryEventRepository();
-        receiverRepository = new MemoryReceiverRepository();
-        airDropService = new AirDropService(eventRepository, receiverRepository);
+        recipientRepository = new MemoryRecipientRepository();
+        airDropService = new AirDropService(eventRepository, recipientRepository);
     }
 
     @AfterEach
     void afterEach() {
         eventRepository.clear();
-        receiverRepository.clear();
+        recipientRepository.clear();
     }
 
     @Test
@@ -38,20 +38,20 @@ public class AirDropServiceTest {
         // given
         long userId = 1;
         String roomId = "room 1";
-        int receiverCount = 5;
-        AirDropRequest payload = new AirDropRequest(1000, receiverCount);
+        int recipientCount = 5;
+        AirDropRequest payload = new AirDropRequest(1000, recipientCount);
 
         // when
         airDropService.send(userId, roomId, payload);
 
         // then
-        Collection<AirDropReceiver> receivers =
-            (Collection<AirDropReceiver>) receiverRepository.findAll();
-        assertThat(receivers.size()).isEqualTo(receiverCount);
+        Collection<AirDropRecipient> recipients =
+            (Collection<AirDropRecipient>) recipientRepository.findAll();
+        assertThat(recipients.size()).isEqualTo(recipientCount);
 
-        for (AirDropReceiver receiver : receivers) {
-            assertThat(receiver.getUserId()).isNull();
-            assertThat(receiver.getAmount()).isGreaterThanOrEqualTo(100);
+        for (AirDropRecipient recipient : recipients) {
+            assertThat(recipient.getUserId()).isNull();
+            assertThat(recipient.getAmount()).isGreaterThanOrEqualTo(100);
         }
     }
 
@@ -73,14 +73,14 @@ public class AirDropServiceTest {
 
         // when
         // then
-        int receivedMoney = airDropService.receive(2L, roomId, token);
-        assertThat(receivedMoney).isGreaterThanOrEqualTo(100);
+        int receivedAmount = airDropService.receive(2L, roomId, token);
+        assertThat(receivedAmount).isGreaterThanOrEqualTo(100);
 
-        receivedMoney = airDropService.receive(3L, roomId, token);
-        assertThat(receivedMoney).isGreaterThanOrEqualTo(100);
+        receivedAmount = airDropService.receive(3L, roomId, token);
+        assertThat(receivedAmount).isGreaterThanOrEqualTo(100);
 
-        receivedMoney = airDropService.receive(4L, roomId, token);
-        assertThat(receivedMoney).isGreaterThanOrEqualTo(100);
+        receivedAmount = airDropService.receive(4L, roomId, token);
+        assertThat(receivedAmount).isGreaterThanOrEqualTo(100);
     }
 
     @Test
@@ -119,19 +119,19 @@ public class AirDropServiceTest {
         AirDropResponse status = airDropService.status(1L, roomId, token);
         assertThat(status.getTotalAmount()).isEqualTo(1000);
         assertThat(status.getReceivedAmount()).isEqualTo(0);
-        assertThat(status.getReceivers()).isNull();
+        assertThat(status.getRecipients()).isNull();
 
         airDropService.receive(2L, roomId, token);
         status = airDropService.status(1L, roomId, token);
         assertThat(status.getTotalAmount()).isEqualTo(1000);
         assertThat(status.getReceivedAmount()).isGreaterThan(0).isLessThan(1000);
-        assertThat(status.getReceivers().size()).isEqualTo(1);
+        assertThat(status.getRecipients().size()).isEqualTo(1);
 
         airDropService.receive(3L, roomId, token);
         status = airDropService.status(1L, roomId, token);
         assertThat(status.getTotalAmount()).isEqualTo(1000);
         assertThat(status.getReceivedAmount()).isEqualTo(1000);
-        assertThat(status.getReceivers().size()).isEqualTo(2);
+        assertThat(status.getRecipients().size()).isEqualTo(2);
     }
 
     @Test
