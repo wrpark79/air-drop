@@ -12,10 +12,10 @@ import java.util.Optional;
 import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 public class AirDropService {
 
     private static final int MAX_AMOUNT = 100000000;
@@ -32,6 +32,7 @@ public class AirDropService {
         this.receiverRepository = receiverRepository;
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public String send(Long userId, String roomId, AirDropRequest payload) {
         int totalAmount = payload.getAmount();
         if (totalAmount > MAX_AMOUNT) {
@@ -74,6 +75,7 @@ public class AirDropService {
         return event.getToken();
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public int receive(Long userId, String roomId, String token) {
         Optional<AirDropEvent> optEvent = eventRepository.findByRoomIdAndToken(roomId, token);
         if (optEvent.isEmpty()) {
