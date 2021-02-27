@@ -1,6 +1,7 @@
 package com.money.airdrop.repository;
 
 import com.money.airdrop.domain.AirDropReceiver;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +39,7 @@ public class MemoryReceiverRepository implements ReceiverRepository {
 
     @Override
     public Iterable<AirDropReceiver> findAll() {
-        return null;
+        return store.values();
     }
 
     @Override
