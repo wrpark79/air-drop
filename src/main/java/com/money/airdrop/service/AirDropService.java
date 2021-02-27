@@ -89,12 +89,12 @@ public class AirDropService {
             throw new IllegalArgumentException("받을 수 있는 시간이 초과되었습니다");
         }
 
-        if (receiverRepository.findByIdAndUserId(event.getId(), userId).isPresent()) {
+        if (receiverRepository.findByEventIdAndUserId(event.getId(), userId).isPresent()) {
             throw new IllegalArgumentException("뿌리기는 한번만 받을 수 있습니다");
         }
 
         Optional<AirDropReceiver> optReceiver =
-            receiverRepository.findByIdAndUserIdNull(event.getId());
+            receiverRepository.findByEventIdAndUserIdNull(event.getId());
         if (optReceiver.isEmpty()) {
             throw new RuntimeException("뿌리기가 이미 종료되었습니다");
         }

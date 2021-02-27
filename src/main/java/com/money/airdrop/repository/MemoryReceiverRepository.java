@@ -69,7 +69,7 @@ public class MemoryReceiverRepository implements ReceiverRepository {
     }
 
     @Override
-    public Optional<AirDropReceiver> findByIdAndUserId(Long id, Long userId) {
+    public Optional<AirDropReceiver> findByEventIdAndUserId(Long id, Long userId) {
         for (AirDropReceiver receiver : store.values()) {
             if (receiver.getEvent().getId().equals(id) &&
                 receiver.getUserId() != null &&
@@ -81,9 +81,9 @@ public class MemoryReceiverRepository implements ReceiverRepository {
     }
 
     @Override
-    public Optional<AirDropReceiver> findByIdAndUserIdNull(Long id) {
+    public Optional<AirDropReceiver> findByEventIdAndUserIdNull(Long eventId) {
         for (AirDropReceiver receiver : store.values()) {
-            if (receiver.getEvent().getId().equals(id) && receiver.getUserId() == null) {
+            if (receiver.getEvent().getId().equals(eventId) && receiver.getUserId() == null) {
                 return Optional.of(receiver);
             }
         }

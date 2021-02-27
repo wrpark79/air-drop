@@ -8,8 +8,8 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ReceiverRepository extends CrudRepository<AirDropReceiver, Long> {
 
-    Optional<AirDropReceiver> findByIdAndUserId(Long id, Long userId);
+    Optional<AirDropReceiver> findByEventIdAndUserId(Long eventId, Long userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<AirDropReceiver> findByIdAndUserIdNull(Long id);
+    Optional<AirDropReceiver> findByEventIdAndUserIdNull(Long eventId);
 }
