@@ -74,13 +74,13 @@ public class AirDropServiceTest {
         // when
         // then
         int receivedAmount = airDropService.receive(2L, roomId, token);
-        assertThat(receivedAmount).isGreaterThanOrEqualTo(100);
+        assertThat(receivedAmount).isGreaterThanOrEqualTo(100).isLessThan(1000);
 
         receivedAmount = airDropService.receive(3L, roomId, token);
-        assertThat(receivedAmount).isGreaterThanOrEqualTo(100);
+        assertThat(receivedAmount).isGreaterThanOrEqualTo(100).isLessThan(1000);
 
         receivedAmount = airDropService.receive(4L, roomId, token);
-        assertThat(receivedAmount).isGreaterThanOrEqualTo(100);
+        assertThat(receivedAmount).isGreaterThanOrEqualTo(100).isLessThan(1000);
     }
 
     @Test

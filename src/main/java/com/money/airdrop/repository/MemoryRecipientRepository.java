@@ -14,7 +14,8 @@ public class MemoryRecipientRepository implements RecipientRepository {
 
     @Override
     public <S extends AirDropRecipient> S save(S entity) {
-        assert entity.getId() != null;
+        entity.setId(++sequence);
+        store.put(entity.getId(), entity);
         return entity;
     }
 
@@ -69,9 +70,9 @@ public class MemoryRecipientRepository implements RecipientRepository {
     }
 
     @Override
-    public Optional<AirDropRecipient> findByEventIdAndUserId(Long id, Long userId) {
+    public Optional<AirDropRecipient> findByEventIdAndUserId(Long eventId, Long userId) {
         for (AirDropRecipient recipient : store.values()) {
-            if (recipient.getEvent().getId().equals(id) &&
+            if (recipient.getEvent().getId().equals(eventId) &&
                 recipient.getUserId() != null &&
                 recipient.getUserId().equals(userId)) {
                 return Optional.of(recipient);
@@ -81,7 +82,7 @@ public class MemoryRecipientRepository implements RecipientRepository {
     }
 
     @Override
-    public Optional<AirDropRecipient> findByEventIdAndUserIdNull(Long eventId) {
+    public Optional<AirDropRecipient> findFirstByEventIdAndUserIdNull(Long eventId) {
         for (AirDropRecipient recipient : store.values()) {
             if (recipient.getEvent().getId().equals(eventId) && recipient.getUserId() == null) {
                 return Optional.of(recipient);

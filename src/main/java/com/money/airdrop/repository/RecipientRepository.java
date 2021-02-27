@@ -11,5 +11,5 @@ public interface RecipientRepository extends CrudRepository<AirDropRecipient, Lo
     Optional<AirDropRecipient> findByEventIdAndUserId(Long eventId, Long userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<AirDropRecipient> findByEventIdAndUserIdNull(Long eventId);
+    Optional<AirDropRecipient> findFirstByEventIdAndUserIdNull(Long eventId);
 }

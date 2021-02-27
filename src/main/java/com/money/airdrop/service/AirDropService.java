@@ -52,25 +52,24 @@ public class AirDropService {
             .token(RandomStringUtils.randomAlphanumeric(3))
             .totalAmount(totalAmount)
             .createdAt(System.currentTimeMillis())
+            .recipients(new ArrayList<>(totalCount))
             .build();
+        eventRepository.save(event);
 
-        List<AirDropRecipient> recipients = new ArrayList<>(totalCount);
         int remainingBonus = totalAmount - MIN_AMOUNT * totalCount;
-
         for (int i = 0; i < totalCount; i++) {
             int bonus =
                 (i < totalCount - 1) ? random.nextInt(remainingBonus + 1) : remainingBonus;
-            recipients.add(
+            AirDropRecipient recipient =
                 AirDropRecipient.builder()
                     .event(event)
                     .amount(MIN_AMOUNT + bonus)
-                    .build());
+                    .build();
+
+            recipient.getEvent().getRecipients().add(recipient);
+            recipientRepository.save(recipient);
             remainingBonus -= bonus;
         }
-        event.setRecipients(recipients);
-
-        eventRepository.save(event);
-        recipientRepository.saveAll(recipients);
 
         return event.getToken();
     }
@@ -94,7 +93,7 @@ public class AirDropService {
         }
 
         Optional<AirDropRecipient> optRecipient =
-            recipientRepository.findByEventIdAndUserIdNull(event.getId());
+            recipientRepository.findFirstByEventIdAndUserIdNull(event.getId());
         if (optRecipient.isEmpty()) {
             throw new RuntimeException("뿌리기가 이미 종료되었습니다");
         }
@@ -106,6 +105,7 @@ public class AirDropService {
         return recipient.getAmount();
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AirDropResponse status(Long userId, String roomId, String token) {
         Optional<AirDropEvent> optEvent =
             eventRepository.findByUserIdAndRoomIdAndToken(userId, roomId, token);
