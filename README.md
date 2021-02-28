@@ -1,4 +1,4 @@
-# Airdrop Web Service
+# Airdrop REST Server
 
 이 프로젝트는 특정 채팅방에서의 뿌리기 기능을 지원한다.
 
