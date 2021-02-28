@@ -3,28 +3,35 @@ package com.money.airdrop;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.money.airdrop.config.AirdropProperties;
 import com.money.airdrop.controller.AirdropRequest;
 import com.money.airdrop.controller.AirdropResponse;
 import com.money.airdrop.domain.AirdropRecipient;
-import com.money.airdrop.repository.MemoryRecipientRepository;
 import com.money.airdrop.repository.MemoryEventRepository;
+import com.money.airdrop.repository.MemoryRecipientRepository;
 import com.money.airdrop.service.AirdropService;
 import java.util.Collection;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
+@EnableConfigurationProperties(value = AirdropProperties.class)
 public class AirdropServiceTest {
 
     AirdropService airdropService;
     MemoryEventRepository eventRepository;
     MemoryRecipientRepository recipientRepository;
+    @Autowired
+    AirdropProperties airdropProperties;
 
     @BeforeEach
     void beforeEach() {
         eventRepository = new MemoryEventRepository();
         recipientRepository = new MemoryRecipientRepository();
-        airdropService = new AirdropService(eventRepository, recipientRepository);
+        airdropProperties = new AirdropProperties(100000000, 100);
+        airdropService = new AirdropService(eventRepository, recipientRepository, airdropProperties);
     }
 
     @AfterEach

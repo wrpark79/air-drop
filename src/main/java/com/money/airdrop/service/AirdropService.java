@@ -1,37 +1,38 @@
 package com.money.airdrop.service;
 
+import com.money.airdrop.config.AirdropProperties;
 import com.money.airdrop.controller.AirdropRequest;
 import com.money.airdrop.controller.AirdropResponse;
 import com.money.airdrop.domain.AirdropEvent;
 import com.money.airdrop.domain.AirdropRecipient;
 import com.money.airdrop.repository.EventRepository;
 import com.money.airdrop.repository.RecipientRepository;
-import java.lang.management.MonitorInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@EnableConfigurationProperties(value = AirdropProperties.class)
 public class AirdropService {
 
-    private static final int MAX_AMOUNT = 100000000;
-    private static final int MIN_AMOUNT = 100;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final EventRepository eventRepository;
     private final RecipientRepository recipientRepository;
-
+    private final AirdropProperties airdropProperties;
     private final Random random = new Random();
 
-    public AirdropService(EventRepository eventRepository,
-        RecipientRepository recipientRepository) {
+    public AirdropService(EventRepository eventRepository, RecipientRepository recipientRepository,
+        AirdropProperties airdropProperties) {
         this.eventRepository = eventRepository;
         this.recipientRepository = recipientRepository;
+        this.airdropProperties = airdropProperties;
     }
 
     /**
@@ -44,17 +45,20 @@ public class AirdropService {
      */
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public String send(Long userId, String roomId, AirdropRequest payload) {
+        int maxAmount = airdropProperties.getMaxAmount();
+        int minAmount = airdropProperties.getMinAmount();
+
         int totalAmount = payload.getAmount();
-        if (totalAmount > MAX_AMOUNT) {
-            throw new IllegalArgumentException("뿌릴 금액은 " + MAX_AMOUNT + "원 이하여야 합니다");
+        if (totalAmount > maxAmount) {
+            throw new IllegalArgumentException("뿌릴 금액은 " + maxAmount + "원 이하여야 합니다");
         }
 
         int totalCount = payload.getCount();
         if (totalCount <= 0) {
             throw new IllegalArgumentException("받을 사람은 최소한 1명 이상이어야 합니다");
-        } else if (totalAmount < MIN_AMOUNT * totalCount) {
+        } else if (totalAmount < minAmount * totalCount) {
             // 작은 금액으로 반복 시도하는 것을 방지하기 위해 최소 금액 제한을 둔다.
-            throw new IllegalArgumentException("1인당 최소 " + MIN_AMOUNT + "원 이상을 받을 수 있어야 합니다");
+            throw new IllegalArgumentException("1인당 최소 " + minAmount + "원 이상을 받을 수 있어야 합니다");
         }
 
         AirdropEvent event = AirdropEvent.builder()
@@ -69,16 +73,17 @@ public class AirdropService {
         logger.info("airdrop event created: " + event.toString());
         eventRepository.save(event);
 
-        int remainingBonus = totalAmount - MIN_AMOUNT * totalCount;
+        int remainingBonus = totalAmount - minAmount * totalCount;
         for (int i = 0; i < totalCount; i++) {
-            // 남은 금액에서 랜덤값으로 결정하여 최소 금액에 더한다.
-            int bonus = (i < totalCount - 1) ? getBonus(remainingBonus) : remainingBonus;
+            // 남은 금액에서 랜덤값으로 결정하고, 최소 금액의 배수로 결정한다.
+            int bonus = (i < totalCount - 1) ?
+                (random.nextInt(remainingBonus + 1) / minAmount) * minAmount : remainingBonus;
 
             // 아직 받을 사람이 결정되지 않았으므로 userId는 null이다.
             AirdropRecipient recipient =
                 AirdropRecipient.builder()
                     .event(event)
-                    .amount(MIN_AMOUNT + bonus)
+                    .amount(minAmount + bonus)
                     .build();
 
             logger.info("airdrop recipient created: " + recipient.toString());
@@ -172,9 +177,5 @@ public class AirdropService {
         response.setReceivedAmount(receivedAmount);
 
         return response;
-    }
-
-    private int getBonus(int remainingBonus) {
-        return (random.nextInt(remainingBonus + 1) / MIN_AMOUNT) * MIN_AMOUNT;
     }
 }
