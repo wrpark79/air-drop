@@ -1,6 +1,8 @@
-.PHONY: clean build run dist
+.PHONY: build run dist docker docker-dist clean
 
-VERSION := `cat gradle.properties | cut -d'=' -f2`
+VERSION := $(shell cat gradle.properties | cut -d'=' -f2)
+JAR_DIST := dist-airdrop-jar-$(VERSION).tar
+DOCKER_DIST := dist-airdrop-docker-$(VERSION).tar
 
 all: build
 
@@ -10,8 +12,20 @@ build:
 run:
 	@./gradlew clean bootRun
 
-dist:
+dist: 
+	@echo $(VERSION) > VERSION
+	@tar cvzf $(JAR_DIST) -C ./build/libs airdrop-$(VERSION).jar
+	@tar rvf $(JAR_DIST) -C ./bin run_jar.sh
+	@tar rvf $(JAR_DIST) ./config VERSION
+
+docker:
 	@docker build -t airdrop:$(VERSION) -t airdrop:latest .
 
+docker-dist:
+	@echo $(VERSION) > VERSION
+	@docker save airdrop:latest > airdrop.img
+	@tar cvf $(DOCKER_DIST) ./airdrop.img ./config VERSION
+	@tar rvf $(DOCKER_DIST) -C ./bin run_docker.sh
+
 clean:
-	@rm -rf build/
+	@rm -rf build/ *.jar *.img *.tar VERSION

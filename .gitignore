@@ -33,3 +33,9 @@ build/
 
 # Vim files
 *.swp
+
+# Distribution files
+VERSION
+*.tar
+*.img
+*.jar
