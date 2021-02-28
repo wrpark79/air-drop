@@ -70,7 +70,7 @@ public class MemoryRecipientRepository implements RecipientRepository {
     }
 
     @Override
-    public Optional<AirdropRecipient> findByEventIdAndUserId(Long eventId, Long userId) {
+    public Optional<AirdropRecipient> findFirstByEventIdAndUserId(Long eventId, Long userId) {
         for (AirdropRecipient recipient : store.values()) {
             if (recipient.getEvent().getId().equals(eventId) &&
                 recipient.getUserId() != null &&

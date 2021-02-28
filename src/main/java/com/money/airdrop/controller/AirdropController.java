@@ -21,7 +21,7 @@ public class AirdropController {
         this.airdropService = airdropService;
     }
 
-    @ApiOperation(value = "Create an airdrop event", notes = "뿌리기 이벤트 생성")
+    @ApiOperation(value = "뿌리기 이벤트 생성")
     @PostMapping("/airdrops")
     public String send(
         @RequestHeader(name = "X-USER-ID") Long userId,
@@ -30,7 +30,7 @@ public class AirdropController {
         return airdropService.send(userId, roomId, payload);
     }
 
-    @ApiOperation(value = "Receive the money", notes = "뿌린 금액 수령")
+    @ApiOperation(value = "뿌리기 금액 수령")
     @PostMapping("/airdrops/{token}")
     public int receive(
         @RequestHeader(name = "X-USER-ID") Long userId,
@@ -39,7 +39,7 @@ public class AirdropController {
         return airdropService.receive(userId, roomId, token);
     }
 
-    @ApiOperation(value = "Query the event status", notes = "뿌리기 이벤트 조회")
+    @ApiOperation(value = "뿌리기 상태 조회")
     @GetMapping("/airdrops/{token}")
     public AirdropResponse status(
         @RequestHeader(name = "X-USER-ID") Long userId,
