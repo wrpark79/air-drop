@@ -1,15 +1,15 @@
 package com.money.airdrop.repository;
 
-import com.money.airdrop.domain.AirDropRecipient;
+import com.money.airdrop.domain.AirdropRecipient;
 import java.util.Optional;
 import javax.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.CrudRepository;
 
-public interface RecipientRepository extends CrudRepository<AirDropRecipient, Long> {
+public interface RecipientRepository extends CrudRepository<AirdropRecipient, Long> {
 
-    Optional<AirDropRecipient> findByEventIdAndUserId(Long eventId, Long userId);
+    Optional<AirdropRecipient> findByEventIdAndUserId(Long eventId, Long userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<AirDropRecipient> findFirstByEventIdAndUserIdNull(Long eventId);
+    Optional<AirdropRecipient> findFirstByEventIdAndUserIdNull(Long eventId);
 }

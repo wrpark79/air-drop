@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 @Builder
 @Entity
-public class AirDropRecipient {
+public class AirdropRecipient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +25,5 @@ public class AirDropRecipient {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "event_id")
-    private AirDropEvent event;
+    private AirdropEvent event;
 }

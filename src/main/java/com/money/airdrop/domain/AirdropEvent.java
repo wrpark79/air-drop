@@ -15,7 +15,7 @@ import lombok.NonNull;
 @Data
 @Builder
 @Entity
-public class AirDropEvent {
+public class AirdropEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,5 +36,5 @@ public class AirDropEvent {
     private Long createdAt;
 
     @OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<AirDropRecipient> recipients;
+    private List<AirdropRecipient> recipients;
 }

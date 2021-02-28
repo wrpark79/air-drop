@@ -1,9 +1,9 @@
 package com.money.airdrop.service;
 
-import com.money.airdrop.controller.AirDropRequest;
-import com.money.airdrop.controller.AirDropResponse;
-import com.money.airdrop.domain.AirDropEvent;
-import com.money.airdrop.domain.AirDropRecipient;
+import com.money.airdrop.controller.AirdropRequest;
+import com.money.airdrop.controller.AirdropResponse;
+import com.money.airdrop.domain.AirdropEvent;
+import com.money.airdrop.domain.AirdropRecipient;
 import com.money.airdrop.repository.EventRepository;
 import com.money.airdrop.repository.RecipientRepository;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AirDropService {
+public class AirdropService {
 
     private static final int MAX_AMOUNT = 100000000;
     private static final int MIN_AMOUNT = 100;
@@ -25,14 +25,14 @@ public class AirDropService {
 
     private final Random random = new Random();
 
-    public AirDropService(EventRepository eventRepository,
+    public AirdropService(EventRepository eventRepository,
         RecipientRepository recipientRepository) {
         this.eventRepository = eventRepository;
         this.recipientRepository = recipientRepository;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public String send(Long userId, String roomId, AirDropRequest payload) {
+    public String send(Long userId, String roomId, AirdropRequest payload) {
         int totalAmount = payload.getAmount();
         if (totalAmount > MAX_AMOUNT) {
             throw new IllegalArgumentException("뿌릴 금액은 " + MAX_AMOUNT + "원 이하여야 합니다");
@@ -45,7 +45,7 @@ public class AirDropService {
             throw new IllegalArgumentException("1인당 최소 " + MIN_AMOUNT + "원 이상을 받을 수 있어야 합니다");
         }
 
-        AirDropEvent event = AirDropEvent.builder()
+        AirdropEvent event = AirdropEvent.builder()
             .userId(userId)
             .roomId(roomId)
             .token(RandomStringUtils.randomAlphanumeric(3))
@@ -59,8 +59,8 @@ public class AirDropService {
         for (int i = 0; i < totalCount; i++) {
             int bonus =
                 (i < totalCount - 1) ? random.nextInt(remainingBonus + 1) : remainingBonus;
-            AirDropRecipient recipient =
-                AirDropRecipient.builder()
+            AirdropRecipient recipient =
+                AirdropRecipient.builder()
                     .event(event)
                     .amount(MIN_AMOUNT + bonus)
                     .build();
@@ -75,7 +75,7 @@ public class AirDropService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public int receive(Long userId, String roomId, String token) {
-        AirDropEvent event = eventRepository.findByRoomIdAndToken(roomId, token)
+        AirdropEvent event = eventRepository.findByRoomIdAndToken(roomId, token)
             .map(e -> {
                 if (e.getUserId().equals(userId)) {
                     throw new IllegalArgumentException("뿌린 사람은 받을 수 없습니다");
@@ -104,8 +104,8 @@ public class AirDropService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public AirDropResponse status(Long userId, String roomId, String token) {
-        AirDropEvent event = eventRepository.findByUserIdAndRoomIdAndToken(userId, roomId, token)
+    public AirdropResponse status(Long userId, String roomId, String token) {
+        AirdropEvent event = eventRepository.findByUserIdAndRoomIdAndToken(userId, roomId, token)
             .map(e -> {
                 if (System.currentTimeMillis() > e.getCreatedAt() + 7 * 86400000) {
                     throw new RuntimeException("시간이 경과되어 조회할 수 없습니다");
@@ -116,12 +116,12 @@ public class AirDropService {
                 throw new IllegalArgumentException("뿌리기를 찾을 수 없습니다");
             });
 
-        AirDropResponse response = new AirDropResponse();
+        AirdropResponse response = new AirdropResponse();
         int receivedAmount = 0;
 
-        List<AirDropRecipient> recipients = event.getRecipients();
+        List<AirdropRecipient> recipients = event.getRecipients();
         if (recipients != null) {
-            for (AirDropRecipient recipient : event.getRecipients()) {
+            for (AirdropRecipient recipient : event.getRecipients()) {
                 if (recipient.getUserId() != null) {
                     receivedAmount += recipient.getAmount();
                     response.addRecipient(recipient.getUserId(), recipient.getAmount());

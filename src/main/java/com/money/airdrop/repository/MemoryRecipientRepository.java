@@ -1,6 +1,6 @@
 package com.money.airdrop.repository;
 
-import com.money.airdrop.domain.AirDropRecipient;
+import com.money.airdrop.domain.AirdropRecipient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -9,19 +9,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MemoryRecipientRepository implements RecipientRepository {
 
-    private static final Map<Long, AirDropRecipient> store = new HashMap<>();
+    private static final Map<Long, AirdropRecipient> store = new HashMap<>();
     private static long sequence = 0;
 
     @Override
-    public <S extends AirDropRecipient> S save(S entity) {
+    public <S extends AirdropRecipient> S save(S entity) {
         entity.setId(++sequence);
         store.put(entity.getId(), entity);
         return entity;
     }
 
     @Override
-    public <S extends AirDropRecipient> Iterable<S> saveAll(Iterable<S> entities) {
-        for (AirDropRecipient entity : entities) {
+    public <S extends AirdropRecipient> Iterable<S> saveAll(Iterable<S> entities) {
+        for (AirdropRecipient entity : entities) {
             entity.setId(++sequence);
             store.put(entity.getId(), entity);
         }
@@ -29,7 +29,7 @@ public class MemoryRecipientRepository implements RecipientRepository {
     }
 
     @Override
-    public Optional<AirDropRecipient> findById(Long aLong) {
+    public Optional<AirdropRecipient> findById(Long aLong) {
         return Optional.empty();
     }
 
@@ -39,12 +39,12 @@ public class MemoryRecipientRepository implements RecipientRepository {
     }
 
     @Override
-    public Iterable<AirDropRecipient> findAll() {
+    public Iterable<AirdropRecipient> findAll() {
         return store.values();
     }
 
     @Override
-    public Iterable<AirDropRecipient> findAllById(Iterable<Long> longs) {
+    public Iterable<AirdropRecipient> findAllById(Iterable<Long> longs) {
         return null;
     }
 
@@ -58,11 +58,11 @@ public class MemoryRecipientRepository implements RecipientRepository {
     }
 
     @Override
-    public void delete(AirDropRecipient entity) {
+    public void delete(AirdropRecipient entity) {
     }
 
     @Override
-    public void deleteAll(Iterable<? extends AirDropRecipient> entities) {
+    public void deleteAll(Iterable<? extends AirdropRecipient> entities) {
     }
 
     @Override
@@ -70,8 +70,8 @@ public class MemoryRecipientRepository implements RecipientRepository {
     }
 
     @Override
-    public Optional<AirDropRecipient> findByEventIdAndUserId(Long eventId, Long userId) {
-        for (AirDropRecipient recipient : store.values()) {
+    public Optional<AirdropRecipient> findByEventIdAndUserId(Long eventId, Long userId) {
+        for (AirdropRecipient recipient : store.values()) {
             if (recipient.getEvent().getId().equals(eventId) &&
                 recipient.getUserId() != null &&
                 recipient.getUserId().equals(userId)) {
@@ -82,8 +82,8 @@ public class MemoryRecipientRepository implements RecipientRepository {
     }
 
     @Override
-    public Optional<AirDropRecipient> findFirstByEventIdAndUserIdNull(Long eventId) {
-        for (AirDropRecipient recipient : store.values()) {
+    public Optional<AirdropRecipient> findFirstByEventIdAndUserIdNull(Long eventId) {
+        for (AirdropRecipient recipient : store.values()) {
             if (recipient.getEvent().getId().equals(eventId) && recipient.getUserId() == null) {
                 return Optional.of(recipient);
             }
