@@ -25,6 +25,6 @@ public class SwaggerConfig {
     }
 
     private ApiInfo getApiInfo() {
-        return new ApiInfoBuilder().title("REST API for Air Drop").version("1.0").build();
+        return new ApiInfoBuilder().title("REST API for Airdrop").version("1.0").build();
     }
 }
