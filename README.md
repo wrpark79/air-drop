@@ -1,6 +1,6 @@
 # Airdrop REST Server
 
-이 프로젝트는 특정 채팅방에서의 뿌리기 기능을 지원한다.
+이 프로젝트는 [Spring Boot](https://spring.io/projects/spring-boot) 기반으로 작성되었고, 특정 채팅방에서의 뿌리기 기능을 지원한다.
 
 ## 기본 설계
 
