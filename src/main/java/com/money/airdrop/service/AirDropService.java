@@ -8,7 +8,6 @@ import com.money.airdrop.repository.EventRepository;
 import com.money.airdrop.repository.RecipientRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
@@ -76,47 +75,46 @@ public class AirDropService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public int receive(Long userId, String roomId, String token) {
-        Optional<AirDropEvent> optEvent = eventRepository.findByRoomIdAndToken(roomId, token);
-        if (optEvent.isEmpty()) {
-            throw new IllegalArgumentException("뿌린 기록을 찾을 수 없습니다");
-        }
-
-        AirDropEvent event = optEvent.get();
-        if (event.getUserId().equals(userId)) {
-            throw new IllegalArgumentException("뿌린 사람은 받을 수 없습니다");
-        } else if (System.currentTimeMillis() > event.getCreatedAt() + 600000) {
-            throw new IllegalArgumentException("받을 수 있는 시간이 초과되었습니다");
-        }
+        AirDropEvent event = eventRepository.findByRoomIdAndToken(roomId, token)
+            .map(e -> {
+                if (e.getUserId().equals(userId)) {
+                    throw new IllegalArgumentException("뿌린 사람은 받을 수 없습니다");
+                } else if (System.currentTimeMillis() > e.getCreatedAt() + 600000) {
+                    throw new IllegalArgumentException("받을 수 있는 시간이 초과되었습니다");
+                }
+                return e;
+            })
+            .orElseThrow(() -> {
+                throw new IllegalArgumentException("뿌린 기록을 찾을 수 없습니다");
+            });
 
         if (recipientRepository.findByEventIdAndUserId(event.getId(), userId).isPresent()) {
             throw new IllegalArgumentException("뿌리기는 한번만 받을 수 있습니다");
         }
 
-        Optional<AirDropRecipient> optRecipient =
-            recipientRepository.findFirstByEventIdAndUserIdNull(event.getId());
-        if (optRecipient.isEmpty()) {
-            throw new RuntimeException("뿌리기가 이미 종료되었습니다");
-        }
-
-        AirDropRecipient recipient = optRecipient.get();
-        recipient.setUserId(userId);
-        recipientRepository.save(recipient);
-
-        return recipient.getAmount();
+        return recipientRepository.findFirstByEventIdAndUserIdNull(event.getId())
+            .map(recipient -> {
+                recipient.setUserId(userId);
+                recipientRepository.save(recipient);
+                return recipient.getAmount();
+            })
+            .orElseThrow(() -> {
+                throw new RuntimeException("뿌리기가 이미 종료되었습니다");
+            });
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public AirDropResponse status(Long userId, String roomId, String token) {
-        Optional<AirDropEvent> optEvent =
-            eventRepository.findByUserIdAndRoomIdAndToken(userId, roomId, token);
-        if (optEvent.isEmpty()) {
-            throw new IllegalArgumentException("뿌리기를 찾을 수 없습니다");
-        }
-
-        AirDropEvent event = optEvent.get();
-        if (System.currentTimeMillis() > event.getCreatedAt() + 7 * 86400000) {
-            throw new RuntimeException("시간이 경과되어 조회할 수 없습니다");
-        }
+        AirDropEvent event = eventRepository.findByUserIdAndRoomIdAndToken(userId, roomId, token)
+            .map(e -> {
+                if (System.currentTimeMillis() > e.getCreatedAt() + 7 * 86400000) {
+                    throw new RuntimeException("시간이 경과되어 조회할 수 없습니다");
+                }
+                return e;
+            })
+            .orElseThrow(() -> {
+                throw new IllegalArgumentException("뿌리기를 찾을 수 없습니다");
+            });
 
         AirDropResponse response = new AirDropResponse();
         int receivedAmount = 0;
