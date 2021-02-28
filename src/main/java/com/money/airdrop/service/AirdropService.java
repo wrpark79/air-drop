@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,7 @@ public class AirdropService {
 
     private static final int MAX_AMOUNT = 100000000;
     private static final int MIN_AMOUNT = 100;
-
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final EventRepository eventRepository;
     private final RecipientRepository recipientRepository;
 
@@ -53,18 +55,22 @@ public class AirdropService {
             .createdAt(System.currentTimeMillis())
             .recipients(new ArrayList<>(totalCount))
             .build();
+
+        logger.info("airdrop event created: " + event.toString());
         eventRepository.save(event);
 
         int remainingBonus = totalAmount - MIN_AMOUNT * totalCount;
         for (int i = 0; i < totalCount; i++) {
             int bonus =
                 (i < totalCount - 1) ? random.nextInt(remainingBonus + 1) : remainingBonus;
+
             AirdropRecipient recipient =
                 AirdropRecipient.builder()
                     .event(event)
                     .amount(MIN_AMOUNT + bonus)
                     .build();
 
+            logger.info("airdrop recipient created: " + recipient.toString());
             recipient.getEvent().getRecipients().add(recipient);
             recipientRepository.save(recipient);
             remainingBonus -= bonus;
@@ -94,6 +100,7 @@ public class AirdropService {
 
         return recipientRepository.findFirstByEventIdAndUserIdNull(event.getId())
             .map(recipient -> {
+                logger.info("airdrop received: " + recipient.toString());
                 recipient.setUserId(userId);
                 recipientRepository.save(recipient);
                 return recipient.getAmount();
@@ -113,7 +120,7 @@ public class AirdropService {
                 return e;
             })
             .orElseThrow(() -> {
-                throw new IllegalArgumentException("뿌리기를 찾을 수 없습니다");
+                throw new IllegalArgumentException("뿌린 기록을 찾을 수 없습니다");
             });
 
         AirdropResponse response = new AirdropResponse();
